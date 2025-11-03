@@ -14,7 +14,11 @@ export enum AIProviderType {
  * must implement. It ensures a uniform API across all models and providers.
  */
 export interface IAIProvider {
-    type: AIProviderType; // Type of provider (ie: openai, anthropic, etc.)
+    
+    /**
+     * Type of ai provider (ie: openai, anthropic, etc.)
+     */
+    type: AIProviderType;
     
     /** Initialize the provider with necessary configuration
      * 

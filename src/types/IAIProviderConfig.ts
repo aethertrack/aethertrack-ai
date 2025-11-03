@@ -7,12 +7,12 @@
  */
 export interface IAIProviderConfig {
   /**
-   * The API key used to authenticate with the provider.
+   * The API key used to authenticate with the provider
    */
   apiKey?: string;
 
   /**
-   * Optional additional fields depending on the provider.
+   * Optional additional fields depending on the provider
    */
   [field: string]: any;
 }
