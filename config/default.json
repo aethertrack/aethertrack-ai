@@ -1,0 +1,12 @@
+{
+    "defaultProvider": "openai",
+    "providers": [
+        {
+            "name": "openai",
+            "providerOptions": {
+                "defaultModel": "gpt-5",
+                "fallbackModels": ["gpt-4"]
+            }
+        }
+    ]
+}

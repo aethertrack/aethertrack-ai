@@ -1,3 +1,4 @@
+import { AppConfig } from "../config/schema";
 import type { IAIGenerationConfig } from "../types/IAIGenerationConfig";
 import type { IAIProviderConfig } from "../types/IAIProviderConfig";
 
@@ -14,18 +15,18 @@ export enum AIProviderType {
  * must implement. It ensures a uniform API across all models and providers.
  */
 export interface IAIProvider {
-    
     /**
      * Type of ai provider (ie: openai, anthropic, etc.)
      */
     type: AIProviderType;
     
-    /** Initialize the provider with necessary configuration
+    /** 
+     * Initialize the provider with necessary configuration
      * 
-     * @param config Configuration object specific to the provider
+     * @param config IAIProviderConfig containing apiKey and any optional fields
      * @returns Promise that resolves when initialization is complete
      */     
-    init(config: IAIProviderConfig): Promise<void>;
+    init(config: AppConfig): Promise<void>;
 
     /**
      * The core text generation function. Every provider must support this

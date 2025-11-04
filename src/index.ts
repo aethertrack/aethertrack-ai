@@ -1,10 +1,20 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
+import { loadAppConfig } from "./config/ConfigLoader";
+import { AppConfig } from "./config/schema";
+import { IAIProvider } from "./providers/IAIProvider";
+import { OpenAIProvider } from "./providers/OpenAIProvider";
 
-dotenv.config();
+async function main() {    
+    console.log("Starting AetherTrack AI application...");
 
-async function main() {
-    console.log("Environment Variables Loaded:");
-    console.log(`OPENAI_API_KEY: ${process.env.OPENAI_API_KEY}`);
+    dotenv.config(); // load .env variables
+    
+    const appConfig: AppConfig = loadAppConfig();
+
+    console.log(`Configuration loaded for environment: ${process.env.NODE_ENV || 'development'}`);
+    
+    const provider:IAIProvider = new OpenAIProvider();
+    await provider.init(appConfig);
 }
 
 main().catch((error) => {
