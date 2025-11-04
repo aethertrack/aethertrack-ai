@@ -1,5 +1,5 @@
 import config from 'config';
-import { AppConfigSchema, AppConfig, ProviderConfig } from './schema';
+import { AppConfigSchema, AppConfig, ProviderConfig } from './Schema';
 
 /**
  * Merge providers by name so environment-specific files can override 
