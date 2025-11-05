@@ -1,12 +1,24 @@
 {
     "defaultProvider": "openai",
-    "providers": [
-        {
+    "providers": {
+        "openai": {
             "name": "openai",
             "providerOptions": {
-                "defaultModel": "gpt-5",
-                "fallbackModels": ["gpt-4"]
+                "defaultModel": "gpt-5",          
+                "models": {
+                    "gpt-5": {
+                        "genOptions": {
+                            "max_output_tokens": 1024
+                        }
+                    },
+                    "gpt-4": {
+                        "genOptions": {
+                            "temperature": 0.5,
+                            "max_output_tokens": 1024
+                        }
+                    }
+                }
             }
         }
-    ]
+    }
 }

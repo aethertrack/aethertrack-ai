@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
 import { loadAppConfig } from "./config/ConfigLoader";
-import { AppConfig } from "./config/schema";
-import { IAIProvider } from "./providers/IAIProvider";
 import { OpenAIProvider } from "./providers/OpenAIProvider";
+import { AppConfig } from './types/schemas/AppConfigSchema';
+import { IAIProvider } from './types/IAIProvider';
 
 async function main() {    
     console.log("Starting AetherTrack AI application...");
@@ -14,7 +14,13 @@ async function main() {
     console.log(`Configuration loaded for environment: ${process.env.NODE_ENV || 'development'}`);
     
     const provider:IAIProvider = new OpenAIProvider();
-    await provider.init(appConfig);
+    await provider.init(appConfig.providers["openai"]);
+
+    const text = await provider.generateText(
+        "Explain polymorphism in OOP", 
+        appConfig.providers["openai"].providerOptions.defaultModel);
+
+    console.log("texxt", text);
 }
 
 main().catch((error) => {

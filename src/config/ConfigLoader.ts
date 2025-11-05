@@ -1,32 +1,5 @@
 import config from 'config';
-import { AppConfigSchema, AppConfig, ProviderConfig } from './Schema';
-
-/**
- * Merge providers by name so environment-specific files can override 
- * individual fields (apiKey, options, etc.)
- * 
- * @param providers 
- * @returns 
- */
-function mergeProviders(providers: ProviderConfig[]): ProviderConfig[] {
-    const map = new Map<string, ProviderConfig>();
-
-    for (const provider of providers) {
-        const existing = map.get(provider.name);
-        if (existing) {
-            // Deep merge fields, preserving nested options
-            map.set(provider.name, {
-                ...existing,
-                ...provider,
-                providerOptions: { ...(existing.providerOptions || {}), ...(provider.providerOptions || {}) }
-            });
-        } else {
-            map.set(provider.name, provider);
-        }
-    }
-
-    return Array.from(map.values());
-}
+import { AppConfig, AppConfigSchema, providerSchemaMap } from '../types/schemas/AppConfigSchema';
 
 /**
  * Load and validate the application configuration, merging options and environment vars
@@ -38,22 +11,18 @@ export function loadAppConfig(): AppConfig {
     // Load config from node-config (already merges default + NODE_ENV json)
     const rawConfig = config.util.toObject();
 
-    // Merge providers array by name
-    const mergedProviders = mergeProviders(rawConfig.providers || []);
+    // Top-level validation
+    const parsedConfig = AppConfigSchema.parse(rawConfig);
 
-    // Inject .env API keys if missing
-    for (const p of mergedProviders) {
-        const envVar = `${p.name.toUpperCase()}_API_KEY`;
-        if (!p.apiKey && process.env[envVar]) {
-            p.apiKey = process.env[envVar];
+    // Merge provider defaults into per-model genOptions
+    for (const provider of Object.values(parsedConfig.providers)) {
+        // Inject environment API key if missing
+        if (!provider.apiKey) {
+            const envVar = `${provider.name.toUpperCase()}_API_KEY`;
+            if (process.env[envVar]) {
+                provider.apiKey = process.env[envVar];
+            }
         }
     }
-
-    const finalConfig = {
-        ...rawConfig,
-        providers: mergedProviders
-    };
-
-    // Validate with Zod
-    return AppConfigSchema.parse(finalConfig);
+    return parsedConfig;
 }
