@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BaseGenOptionsSchema, BaseProviderConfigSchema, BaseProviderModelSchema } from "./BaseSchema";
+import { BaseEmbedOptionsSchema, BaseGenOptionsSchema, BaseImageOptionsSchema, BaseModelSchema, BaseProviderConfigSchema } from "./BaseSchema";
 
 /**
  * OpenAI-specific per model generation options 
@@ -13,19 +13,34 @@ export const OpenAIGenOptionsSchema = BaseGenOptionsSchema.extend({
 });
 
 /**
- * OpenAI-specific schema
- * Each model entry has its own options and optional genOptions.
+ * OpenAI-specific embedding options
  */
-export const OpenAIModelConfigSchema = BaseProviderModelSchema.extend({
-    genOptions: OpenAIGenOptionsSchema.optional()
+export const OpenAIEmbedOptionsSchema = BaseEmbedOptionsSchema.extend({
+    encodingFormat: z.enum(["float", "base64"]).optional(),
+    dimensions: z.number().optional(),
+});
+
+/**
+ * OpenAI-specific image generation options
+ */
+export const OpenAIImageOptionsSchema = BaseImageOptionsSchema.extend({
+    size: z.enum(["256x256", "512x512", "1024x1024"]).optional(),
+    quality: z.enum(["standard", "hd"]).optional(),
+});
+
+/**
+ * OpenAI per-model schema — supports gen, embed, and image options.
+ */
+export const OpenAIModelConfigSchema = BaseModelSchema.extend({
+    genOptions: OpenAIGenOptionsSchema.optional(),
+    embedOptions: OpenAIEmbedOptionsSchema.optional(),
+    imageOptions: OpenAIImageOptionsSchema.optional(),
 });
 
 /**
  * OpenAI-specific providerOptions for per model configurations
  */
 export const OpenAIProviderOptionsSchema = z.object({
-    defaultModel: z.string(),
-
     // Map of model name → per-model config
     models: z.record(z.string(), OpenAIModelConfigSchema),
 });

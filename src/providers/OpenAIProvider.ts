@@ -1,15 +1,13 @@
 import OpenAI from "openai";
-import { IAIProvider } from "../types/IAIProvider";
-import { BaseProviderConfigSchema } from "../types/schemas/BaseSchema";
+import { AIProviderType, IAIProvider } from "../types/IAIProvider";
 import { OpenAIProviderConfig } from "../types/schemas/OpenAISchema";
-
 
 /**
  * OpenAIProvider implements the IAIProvider interface
  * connecting to OpenAI's models via the official SDK
  */
-export class OpenAIProvider implements IAIProvider {
-    type = "openai";
+export class OpenAIProvider implements IAIProvider<OpenAIProviderConfig> {
+    type = AIProviderType.OpenAI;
 
     /** OpenAI client instance and configs */
     private client: OpenAI | null = null;
@@ -20,7 +18,7 @@ export class OpenAIProvider implements IAIProvider {
      *
      * @param config configs containing apiKey and any optional fields
      * @throws Error if no config found or no API key is provided
-     */    
+     */
     async init(config: OpenAIProviderConfig): Promise<void> {
         if (!config.apiKey) {
             throw new Error("OpenAI API key is required in config");
@@ -56,4 +54,39 @@ export class OpenAIProvider implements IAIProvider {
 
         return response.output_text;
     }
+
+    async embed(
+        input: string | string[],
+        modelName = "text-embedding-3-large",
+        options: Record<string, any> = {}
+    ): Promise<number[][]> {
+        if (!this.client || !this.config) {
+            throw new Error("OpenAI not initialized");
+        }
+
+        const modelConfig = this.config.providerOptions.models[modelName];
+        if (!modelConfig?.embedOptions) {
+            throw new Error(`No embedding config found for model: ${modelName}`);
+        }
+
+        const embedOpts = modelConfig.embedOptions;
+
+        const mergedOptions = {
+            ...modelConfig.embedOptions,
+            ...options,
+        };
+
+        const response = await this.client.embeddings.create({
+            model: modelName,
+            input,
+            encoding_format: mergedOptions.encodingFormat ?? "float",
+            dimensions: mergedOptions.dimensions ?? undefined,
+        });
+
+        return response.data.map((item) => item.embedding);
+    }
+
+    async stream(prompt: string, model: string, options?: { genOptions?: Record<string, any>; }): AsyncIterable<string> | Promise<AsyncIterable<string>> {
+        throw new Error("Method not implemented.");
+    }    
 }

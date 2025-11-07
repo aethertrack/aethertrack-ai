@@ -16,11 +16,16 @@ async function main() {
     const provider:IAIProvider = new OpenAIProvider();
     await provider.init(appConfig.providers["openai"]);
 
+  // Create embeddings
+  const vectors = await provider.embed("quantum entanglement", "text-embedding-3-large");
+  console.log("Embedding vector length:", vectors[0].length);    
+  console.log("Embedding vectors:", JSON.stringify(vectors[0], null, 2));   
+/*
     const text = await provider.generateText(
         "Explain polymorphism in OOP", 
-        appConfig.providers["openai"].providerOptions.defaultModel);
+        appConfig.providers["openai"].providerOptions.models["gpt-5"].modelName);
 
-    console.log("texxt", text);
+    console.log("texxt", text);*/
 }
 
 main().catch((error) => {
