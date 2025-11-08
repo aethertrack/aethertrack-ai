@@ -1,0 +1,56 @@
+{
+  "defaultProvider": "openai",
+  "providers": {
+    "openai": {
+      "name": "openai",
+      "defaultModel": "gpt-5",
+      "models": {
+        "gpt-5": {
+          "genOptions": {
+            "temperature": 0.7,
+            "max_output_tokens": 1024,
+            "topP": 0.9
+          },
+          "embedOptions": {
+            "encodingFormat": "float",
+            "dimensions": 3072
+          },
+          "streamOptions": {
+            "reasoning": { "effort": "low" },
+            "instructions": "Answer concisely."
+          }
+        },
+        "gpt-4": {
+          "genOptions": {
+            "temperature": 0.5,
+            "max_output_tokens": 1024
+          }
+        },
+        "text-embedding-3-large": {
+          "embedOptions": {
+            "encodingFormat": "float",
+            "dimensions": 3072
+          }
+        }
+      }
+    },
+    "anthropic": {
+      "defaultModel": "claude-3",
+      "name": "anthropic",
+      "models": {
+        "claude-3": {
+          "genOptions": {
+            "max_tokens_to_sample": 1024,
+            "temperature": 0.7
+          }
+        },
+        "claude-2": {
+          "genOptions": {
+            "max_tokens_to_sample": 1024,
+            "temperature": 0.3
+          }
+        }
+      }
+    }
+  }
+}
