@@ -1,10 +1,17 @@
 import dotenv from "dotenv";
-
-dotenv.config();
+import { IAppConfig, IProviderConfig } from "./types/BaseConfigs";
+import { loadAppConfig } from "./config/ConfigLoader";
 
 async function main() {
-    console.log("Environment Variables Loaded:");
-    console.log(`OPENAI_API_KEY: ${process.env.OPENAI_API_KEY}`);
+    console.log("Starting AetherTrack AI application...");
+
+    dotenv.config(); // load .env variables
+    
+    const appConfig: IAppConfig<any> = loadAppConfig();
+
+    console.log(`Configuration loaded for environment: ${process.env.NODE_ENV || 'development'}`);
+
+    console.log(appConfig);
 }
 
 main().catch((error) => {
