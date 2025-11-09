@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import { IAppConfig } from "./types/BaseConfigs";
 import { loadAppConfig } from "./config/ConfigLoader";
 import { OpenAIProvider } from "./providers/OpenAIProvider";
+import { AnthropicProvider } from "./providers/AnthropicProvider";
 
 async function main() {
     console.log("Starting AetherTrack AI application...");
@@ -33,7 +34,20 @@ async function main() {
     //console.log("Generated response from OpenAI:");
     //console.log(response);
 
-    //console.log("---------------");
+    const anthropicProvider:AnthropicProvider = new AnthropicProvider();
+    await anthropicProvider.init(appConfig.providers.anthropic);
+
+    //const response: any = await anthropicProvider.generateText("Hello world!, How are you?");
+
+    let resultString: string = "";
+    const response: any = await anthropicProvider.stream("Hello world!, How are you?", (chunk) => {        
+        resultString += chunk?.delta?.text || "";
+    });
+
+    console.log("Generated response from Anthropic:");
+    console.log(response || resultString);
+
+    console.log("---------------");
 }
 
 main().catch((error) => {
