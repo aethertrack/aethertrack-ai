@@ -4,7 +4,7 @@
  * Registry interface mapping providers to their configuration types
  */
 export interface IProviderRegistry {
-  //  openai: OpenAIProviderConfig;
+   // openai: OpenAIProviderConfig;
     // anthropic: AnthropicProviderConfig;
     // bedrock: BedrockProviderConfig;
 }

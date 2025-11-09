@@ -1,4 +1,4 @@
-import { IModelConfig } from "./BaseConfigs";
+import { IModelConfig, IProviderConfig } from "./BaseConfigs";
 
 /**
  * Enumeration of supported AI Provider types
@@ -12,13 +12,14 @@ export enum AIProviderType {
  * Defines the standard contract that every ai provider (OpenAI, Anthropic, etc.)
  * must implement. It ensures a uniform API across all models and providers.
  */
-export interface IProvider<TConfig = any> {
+export interface IProvider<TConfig extends IProviderConfig = IProviderConfig> {
     /**
      * Type of ai provider (ie: openai, anthropic, etc.)
      */
     readonly type: AIProviderType;
     
-    /** Initialize the provider with necessary configuration
+    /** 
+     * Initialize the provider with necessary configuration
      * 
      * @param config Configuration object specific to the provider
      * @returns Promise that resolves when initialization is complete
@@ -29,9 +30,10 @@ export interface IProvider<TConfig = any> {
      * The core text generation function. Every provider must support this
      * 
      * @param prompt The text input to send to the model
-     * @param options Optional parameters specific to the provider/model
+     * @param model Optional model name to use (overrides defaultModel in config)
+     * @param options Optional parameters specific to the model
      * @returns Promise resolving to the generated response object
      */
     
-    generateText(prompt: string, options?: Partial<IModelConfig["genOptions"]>): Promise<any>;
+    generateText(prompt: string, model?: string, options?: Partial<IModelConfig["genOptions"]>): Promise<any>;
 }

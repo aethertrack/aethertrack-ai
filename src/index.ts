@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
-import { IAppConfig, IProviderConfig } from "./types/BaseConfigs";
+import { IAppConfig } from "./types/BaseConfigs";
 import { loadAppConfig } from "./config/ConfigLoader";
+import { OpenAIProvider } from "./providers/OpenAIProvider";
 
 async function main() {
     console.log("Starting AetherTrack AI application...");
@@ -12,6 +13,18 @@ async function main() {
     console.log(`Configuration loaded for environment: ${process.env.NODE_ENV || 'development'}`);
 
     console.log(appConfig);
+    //console.log(JSON.stringify(appConfig, null, 2));
+
+    const openaiProvider: OpenAIProvider = new OpenAIProvider();
+    await openaiProvider.init(appConfig.providers.openai);
+
+    const prompt: string = "Once upon a time in a land far, far away, there lived a";
+    const response: any = await openaiProvider.generateText(prompt, "gpt-5");
+
+    console.log("Generated response from OpenAI:");
+    console.log(response);
+
+    console.log("---------------");
 }
 
 main().catch((error) => {
