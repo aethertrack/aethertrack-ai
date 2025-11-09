@@ -25,9 +25,7 @@ function registerProviders() {
 }
 
 async function main() {
-    console.log("Starting AetherTrack AI application...");
-
-    dotenv.config(); // load .env variables
+    console.log("Starting AetherTrack AI application...");    
     
     const appConfig: IAppConfig<any> = loadAppConfig();
 
@@ -47,6 +45,8 @@ async function main() {
     if(!provider || !provider.generateText) {
         throw new Error(`Failed to create provider: ${providerName}`);
     }
+
+
 
    // const result = await provider.generateText("Write a haiku about lazy loading.");
 
@@ -69,22 +69,29 @@ async function main() {
 */
   //  const response: any = await openaiProvider.embed("Hello world!", "text-embedding-3-large");
 
+    const anthropicProviderConfig = appConfig.providers["anthropic"];
+    const anthropic:IProvider = await ProviderRegistry.createProvider("anthropic", anthropicProviderConfig);
+
+    if(!anthropic || !anthropic.generateText) {
+        throw new Error(`Failed to create provider: anthropic`);
+    }
+
     //console.log("Generated response from OpenAI:");
     //console.log(response);
 
     /*const anthropicProvider:AnthropicProvider = new AnthropicProvider();
     await anthropicProvider.init(appConfig.providers.anthropic);
+*/
+    const response: any = await anthropic.generateText("Hello world!, How are you?");
 
-    //const response: any = await anthropicProvider.generateText("Hello world!, How are you?");
-
-    let resultString: string = "";
+    /*let resultString: string = "";
     const response: any = await anthropicProvider.stream("Hello world!, How are you?", (chunk) => {        
         resultString += chunk?.delta?.text || "";
-    });
+    });*/
 
     console.log("Generated response from Anthropic:");
-    console.log(response || resultString);
-*/
+    console.log(response);
+
     console.log("---------------");
 }
 

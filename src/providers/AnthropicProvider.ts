@@ -36,7 +36,7 @@ export class AnthropicProvider implements IProvider {
         }
 
         // Merge options with model config defaults
-        const mergedOptions = { ...modelConfig.genOptions, ...options };
+        const mergedOptions = { ...(modelConfig.genOptions ?? {}), ...(options ?? {}) };
 
         // Call anthropic client to call to generate text on the model
         const response = await this.client.messages.create({
@@ -56,12 +56,13 @@ export class AnthropicProvider implements IProvider {
         options?: Partial<IModelConfig["streamOptions"]>): Promise<void> {
 
         // Stream is just generateText with stream option enabled
-        options = {
+        const mergedOptions = {
             stream: true,
-            ...options
+            ...(options ?? {})
         };
+
         
-        const stream = await this.generateText(prompt, model, options);
+        const stream = await this.generateText(prompt, model, mergedOptions);
 
         // send the resulting chunk text to the onChunk callback
         for await (const chunk of stream) {

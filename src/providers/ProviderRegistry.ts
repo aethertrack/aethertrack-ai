@@ -53,5 +53,23 @@ export class ProviderRegistry {
      */
     static hasProvider(providerName: string): boolean {
         return this.providers.has(providerName);
-    }    
+    }
+    
+    /**
+     * Unregister a previously registered provider
+     * 
+     * @param providerName provider name to unregister
+     * @returns true if the provider has been deleted from the registry
+     */
+    static unregisterProvider(providerName: string): boolean {
+        return this.providers.delete(providerName);
+    }
+
+    /**
+     * List registered provider names
+     * @returns array of registered provider names
+     */
+    static listProviders(): string[] {
+        return Array.from(this.providers.keys());
+    }        
 }

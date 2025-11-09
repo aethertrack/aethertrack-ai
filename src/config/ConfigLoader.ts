@@ -1,6 +1,6 @@
+import dotenv from 'dotenv';
 import config from 'config';
 import { IAppConfig, IProviderConfig } from '../types/BaseConfigs.js';
-import { ProviderRegistry } from '../providers/ProviderRegistry.js';
 
 /**
  * Load and validate the application configuration, merging options and environment vars
@@ -8,12 +8,14 @@ import { ProviderRegistry } from '../providers/ProviderRegistry.js';
  * 
  * @returns AppConfig loaded from config files and environment variables
  */
-export function loadAppConfig(): IAppConfig<ProviderRegistry> {
+export function loadAppConfig(): IAppConfig<Record<string, IProviderConfig>> {
+    dotenv.config(); // load .env variables
+
     // Load config from node-config (already merges default + NODE_ENV json)
     const rawConfig = config.util.toObject();
 
     // Top-level laod as partial to allow for further processing
-    const parsed = rawConfig as IAppConfig<Partial<ProviderRegistry>>;
+    const parsed = rawConfig as IAppConfig<Record<string, IProviderConfig>>;
 
     // Minimal validations
     if (!parsed.defaultProvider) {
@@ -42,5 +44,5 @@ export function loadAppConfig(): IAppConfig<ProviderRegistry> {
         }
     }
 
-    return parsed as IAppConfig<ProviderRegistry>;
+    return parsed as IAppConfig<Record<string, IProviderConfig>>;
 }
