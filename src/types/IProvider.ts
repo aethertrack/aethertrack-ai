@@ -5,6 +5,7 @@ import { IModelConfig, IProviderConfig } from "./BaseConfigs";
  */
 export enum AIProviderType {
     OpenAI = "openai",
+    Anthropic = "anthropic",
 }
 
 /**

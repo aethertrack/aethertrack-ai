@@ -30,20 +30,13 @@
                 }
             }
         },
-        "anthropic": {
-            "defaultModel": "claude-3",
+        "anthropic": {            
             "name": "anthropic",
+            "defaultModel": "claude-sonnet-4-5-20250929",
             "models": {
-                "claude-3": {
+                "claude-sonnet-4-5-20250929": {
                     "genOptions": {
-                        "max_tokens_to_sample": 1024,
-                        "temperature": 0.7
-                    }
-                },
-                "claude-2": {
-                    "genOptions": {
-                        "max_tokens_to_sample": 1024,
-                        "temperature": 0.3
+                        "max_tokens": 1024
                     }
                 }
             }
