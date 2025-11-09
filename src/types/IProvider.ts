@@ -1,4 +1,4 @@
-import { IModelConfig, IProviderConfig } from "./BaseConfigs";
+import { IModelConfig, IProviderConfig } from "./BaseConfigs.js";
 
 /**
  * Enumeration of supported AI Provider types

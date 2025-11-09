@@ -1,6 +1,6 @@
 import OpenAI from "openai";
-import { IModelConfig, IProviderConfig } from "../types/BaseConfigs";
-import { AIProviderType, IProvider } from "../types/IProvider";
+import { IModelConfig, IProviderConfig } from "../types/BaseConfigs.js";
+import { AIProviderType, IProvider } from "../types/IProvider.js";
 
 export class OpenAIProvider implements IProvider<IProviderConfig> {
     type: AIProviderType = AIProviderType.OpenAI;
@@ -35,7 +35,7 @@ export class OpenAIProvider implements IProvider<IProviderConfig> {
         }
 
         // Merge options with model config defaults
-        const mergedOptions = { ...modelConfig.genOptions, ...options };
+        const mergedOptions = { ...(modelConfig.genOptions ?? {}), ...(options ?? {}) };
 
         // Call openai client to call to generate text on the model
         const response = await this.client.responses.create({
@@ -66,7 +66,7 @@ export class OpenAIProvider implements IProvider<IProviderConfig> {
         }
 
         // Merge options with model config defaults
-        const mergedOptions = { ...modelConfig.streamOptions, ...options };
+        const mergedOptions = { ...(modelConfig.streamOptions ?? {}), ...(options ?? {}) };
 
         // Call openai client to stream text generation
         const stream = await this.client.chat.completions.create({
@@ -95,8 +95,8 @@ export class OpenAIProvider implements IProvider<IProviderConfig> {
             throw new Error(`Model ${modelToUse} not found`);
         }
 
-        // Merge options with model config defaults
-        const mergedOptions = { ...modelConfig.embedOptions, ...options };    
+        // Merge options with model config defaults  
+        const mergedOptions = { ...(modelConfig.embedOptions ?? {}), ...(options ?? {}) };
         
         // Call openai client to generate embeddings
         const response = await this.client.embeddings.create({
