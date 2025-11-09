@@ -1,6 +1,6 @@
 import OpenAI from "openai";
-import { IModelConfig, IProviderConfig } from "../types/BaseConfigs";
-import { AIProviderType, IProvider } from "../types/IProvider";
+import { IModelConfig, IProviderConfig } from "../types/BaseConfigs.js";
+import { AIProviderType, IProvider } from "../types/IProvider.js";
 
 export class OpenAIProvider implements IProvider<IProviderConfig> {
     type: AIProviderType = AIProviderType.OpenAI;

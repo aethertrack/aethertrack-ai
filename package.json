@@ -1,4 +1,5 @@
 {
+    "type": "module",
     "name": "aethertrack-ai",
     "version": "0.0.1",
     "description": "",
@@ -9,9 +10,8 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "tsc",
-        "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
         "start": "node dist/index.js",
-        "cli": "ts-node src/cli/index.ts"
+        "dev": "nodemon --watch src --ext ts --exec \"npm run build && npm run start\""
     },
     "repository": {
         "type": "git",
@@ -21,6 +21,12 @@
         "url": "https://github.com/aethertrack/aethertrack-ai/issues"
     },
     "homepage": "https://github.com/aethertrack/aethertrack-ai#readme",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        }
+    },
     "dependencies": {
         "@anthropic-ai/sdk": "^0.68.0",
         "axios": "^1.13.1",
@@ -30,7 +36,9 @@
         "openai": "^6.8.1"
     },
     "devDependencies": {
-        "ts-node": "^10.9.1",
+        "@types/config": "^3.3.5",
+        "nodemon": "^3.1.10",
+        "ts-node": "^10.9.2",
         "ts-node-dev": "^2.0.0",
         "typescript": "^5.5.4"
     }

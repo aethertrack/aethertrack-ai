@@ -1,6 +1,6 @@
 import config from 'config';
-import { IAppConfig, IProviderConfig } from '../types/BaseConfigs';
-import { IProviderRegistry } from '../types/IProviderRegistry';
+import { IAppConfig, IProviderConfig } from '../types/BaseConfigs.js';
+import { ProviderRegistry } from '../providers/ProviderRegistry.js';
 
 /**
  * Load and validate the application configuration, merging options and environment vars
@@ -8,12 +8,12 @@ import { IProviderRegistry } from '../types/IProviderRegistry';
  * 
  * @returns AppConfig loaded from config files and environment variables
  */
-export function loadAppConfig(): IAppConfig<IProviderRegistry> {
+export function loadAppConfig(): IAppConfig<ProviderRegistry> {
     // Load config from node-config (already merges default + NODE_ENV json)
     const rawConfig = config.util.toObject();
 
     // Top-level laod as partial to allow for further processing
-    const parsed = rawConfig as IAppConfig<Partial<IProviderRegistry>>;
+    const parsed = rawConfig as IAppConfig<Partial<ProviderRegistry>>;
 
     // Minimal validations
     if (!parsed.defaultProvider) {
@@ -42,5 +42,5 @@ export function loadAppConfig(): IAppConfig<IProviderRegistry> {
         }
     }
 
-    return parsed as IAppConfig<IProviderRegistry>;
+    return parsed as IAppConfig<ProviderRegistry>;
 }
