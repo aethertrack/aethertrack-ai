@@ -14,10 +14,6 @@
                         "dimensions": 3072
                     },
                     "streamOptions": {
-                        "reasoning": {
-                            "effort": "low"
-                        },
-                        "instructions": "Answer concisely."
                     }
                 },
                 "gpt-4": {

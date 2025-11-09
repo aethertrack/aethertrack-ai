@@ -27,13 +27,32 @@ export interface IProvider<TConfig extends IProviderConfig = IProviderConfig> {
     init(config: TConfig): Promise<void>;
 
     /**
-     * The core text generation function. Every provider must support this
+     * The core text generation function.
+     * 
+     * @param prompt The text input to send to the model
+     * @param model Optional model name to use (overrides defaultModel in config)
+     * @param options Optional parameters specific to the model
+     * @returns Promise resolving to the generated response object
+     */    
+    generateText?(prompt: string, model?: string, options?: Partial<IModelConfig["genOptions"]>): Promise<any>;
+
+    /**
+     * Streams text generation from the model in chunks.
+     * 
+     * @param prompt The text input to send to the model
+     * @param onChunk Callback function to handle each chunk of streamed data
+     * @param model Optional model name to use (overrides defaultModel in config)
+     * @param options Optional parameters specific to the model
+     */
+    stream?(prompt: string, onChunk: (chunk: any) => void, model?: string, options?: Partial<IModelConfig["streamOptions"]>): Promise<void>;
+
+    /**
+     * Queries the provider to generate embeddings for the given prompt.
      * 
      * @param prompt The text input to send to the model
      * @param model Optional model name to use (overrides defaultModel in config)
      * @param options Optional parameters specific to the model
      * @returns Promise resolving to the generated response object
      */
-    
-    generateText(prompt: string, model?: string, options?: Partial<IModelConfig["genOptions"]>): Promise<any>;
+    embed?(prompt: string, model?: string, options?: Partial<IModelConfig["embedOptions"]>): Promise<any>;    
 }
