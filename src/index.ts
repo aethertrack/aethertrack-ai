@@ -72,7 +72,7 @@ async function main() {
     const anthropicProviderConfig = appConfig.providers["anthropic"];
     const anthropic:IProvider = await ProviderRegistry.createProvider("anthropic", anthropicProviderConfig);
 
-    if(!anthropic || !anthropic.generateText) {
+    if(!anthropic || !anthropic.generateText || !anthropic.stream) {
         throw new Error(`Failed to create provider: anthropic`);
     }
 
@@ -82,15 +82,15 @@ async function main() {
     /*const anthropicProvider:AnthropicProvider = new AnthropicProvider();
     await anthropicProvider.init(appConfig.providers.anthropic);
 */
-    const response: any = await anthropic.generateText("Hello world!, How are you?");
+    //const response: any = await anthropic.generateText("Hello world!, How are you?");
 
     /*let resultString: string = "";
-    const response: any = await anthropicProvider.stream("Hello world!, How are you?", (chunk) => {        
+    const response: any = await anthropic.stream("Hello world!, How are you?", (chunk) => {        
         resultString += chunk?.delta?.text || "";
-    });*/
+    });
 
     console.log("Generated response from Anthropic:");
-    console.log(response);
+    console.log(resultString);*/
 
     console.log("---------------");
 }
