@@ -110,6 +110,11 @@ async function main() {
         throw new Error(`Failed to create provider: ${providerName}`);
     }
 
+    const result = await provider.generateText("Write a short story about a brave little toaster.");
+
+    console.log(`Generated response from ${providerName}:`);
+    console.log(JSON.stringify(result, null, 2));
+
     console.log("-------------------");
 }
 

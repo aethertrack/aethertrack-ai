@@ -42,9 +42,9 @@
         },
         "huggingface": {
             "name": "huggingface",
-            "defaultModel": "gpt2",
+            "defaultModel": "tiiuae/falcon-7b-instruct",
             "models": {
-                "gpt2": {
+                "tiiuae/falcon-7b-instruct": {
                     "genOptions": {
                         "max_new_tokens": 50
                     }

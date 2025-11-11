@@ -1,4 +1,4 @@
-import { InferenceClient } from "@huggingface/inference"; 
+import { InferenceClient } from "@huggingface/inference";
 import { IModelConfig, IProviderConfig } from "../types/BaseConfigs.js";
 import { AIProviderType, IProvider } from "../types/IProvider.js";
 
@@ -22,6 +22,36 @@ export class HuggingFaceProvider implements IProvider<IProviderConfig> {
         model?: string,
         options?: Partial<IModelConfig["genOptions"]>): Promise<any> {
 
-            
-    }    
+        // make sure the provider is initialized and ready
+        if (!this.client || !this.config) {
+            throw new Error("Provider not initialized");
+        }
+
+        // If model is not provided, use defaultModel from config
+        const modelToUse: string = model || this.config.defaultModel;
+        const modelConfig: IModelConfig = this.config.models[modelToUse];
+        if (!modelConfig) {
+            throw new Error(`Model ${modelToUse} not found`);
+        }
+        try {
+
+            const response = await this.client.chatCompletion({
+                model: "meta-llama/Llama-3.1-8B-Instruct",
+                provider: "sambanova", // or together, fal-ai, replicate, cohere …
+                messages: [
+                    {
+                        role: "user",
+                        content: "Hello, nice to meet you!",
+                    },
+                ],
+                max_tokens: 512,
+                temperature: 0.5,
+            });
+ 
+            return response;
+        } catch (err) {
+            console.log("Error generating text:", (err as any));
+            throw err;
+        }
+    }
 }
