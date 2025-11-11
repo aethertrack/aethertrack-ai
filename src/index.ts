@@ -22,6 +22,15 @@ function registerProviders() {
         await anthropic.init(config);
         return anthropic;
     });    
+
+    // Lazy load HuggingFace
+    ProviderRegistry.registerProvider("huggingface", async (config:IProviderConfig) => {
+        console.log("Loading HuggingFaceProvider provider module...");
+        const { HuggingFaceProvider } = await import("./providers/HuggingFaceProvider.js");
+        const hfProvider = new HuggingFaceProvider();
+        await hfProvider.init(config);
+        return hfProvider;
+    });     
 }
 
 async function main() {
@@ -36,7 +45,7 @@ async function main() {
     console.log("Registering providers...");
     registerProviders();
 
-    const providerName = appConfig.defaultProvider;
+    /*const providerName = appConfig.defaultProvider;
     const providerConfig = appConfig.providers[providerName];
 
     console.log(`Loading provider: ${providerName}`);
@@ -46,7 +55,7 @@ async function main() {
         throw new Error(`Failed to create provider: ${providerName}`);
     }
 
-
+*/
 
    // const result = await provider.generateText("Write a haiku about lazy loading.");
 
@@ -69,12 +78,12 @@ async function main() {
 */
   //  const response: any = await openaiProvider.embed("Hello world!", "text-embedding-3-large");
 
-    const anthropicProviderConfig = appConfig.providers["anthropic"];
+   /* const anthropicProviderConfig = appConfig.providers["anthropic"];
     const anthropic:IProvider = await ProviderRegistry.createProvider("anthropic", anthropicProviderConfig);
 
     if(!anthropic || !anthropic.generateText || !anthropic.stream) {
         throw new Error(`Failed to create provider: anthropic`);
-    }
+    }*/
 
     //console.log("Generated response from OpenAI:");
     //console.log(response);
@@ -92,7 +101,21 @@ async function main() {
     console.log("Generated response from Anthropic:");
     console.log(resultString);*/
 
-    console.log("---------------");
+//-----------------hf
+    const providerName = "huggingface";
+    const providerConfig = appConfig.providers[providerName]
+    const provider:IProvider = await ProviderRegistry.createProvider(providerName, providerConfig);
+
+    if(!provider || !provider.generateText) {
+        throw new Error(`Failed to create provider: ${providerName}`);
+    }
+
+    const result = await provider.generateText("Write a short story about a brave little toaster.");
+
+    console.log(`Generated response from ${providerName}:`);
+    console.log(JSON.stringify(result, null, 2));
+
+    console.log("-------------------");
 }
 
 main().catch((error) => {

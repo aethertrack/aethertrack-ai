@@ -1,4 +1,5 @@
-import { loadAppConfig } from "../../src/config/ConfigLoader.js";
+import { describe, it, beforeEach, afterEach, expect } from "vitest";
+import { loadAppConfig } from "../../config/ConfigLoader.js";
 
 describe("ConfigLoader", () => {
     beforeEach(() => {

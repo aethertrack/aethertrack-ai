@@ -6,6 +6,7 @@ import { IModelConfig, IProviderConfig } from "./BaseConfigs.js";
 export enum AIProviderType {
     OpenAI = "openai",
     Anthropic = "anthropic",
+    HuggingFace = "huggingface",
 }
 
 /**

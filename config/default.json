@@ -13,8 +13,7 @@
                         "encodingFormat": "float",
                         "dimensions": 3072
                     },
-                    "streamOptions": {
-                    }
+                    "streamOptions": {}
                 },
                 "gpt-4": {
                     "genOptions": {
@@ -30,13 +29,24 @@
                 }
             }
         },
-        "anthropic": {            
+        "anthropic": {
             "name": "anthropic",
             "defaultModel": "claude-sonnet-4-5-20250929",
             "models": {
                 "claude-sonnet-4-5-20250929": {
                     "genOptions": {
                         "max_tokens": 1024
+                    }
+                }
+            }
+        },
+        "huggingface": {
+            "name": "huggingface",
+            "defaultModel": "tiiuae/falcon-7b-instruct",
+            "models": {
+                "tiiuae/falcon-7b-instruct": {
+                    "genOptions": {
+                        "max_new_tokens": 50
                     }
                 }
             }
