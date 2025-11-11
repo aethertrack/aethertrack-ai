@@ -1,5 +1,6 @@
-import { ProviderRegistry } from "../../src/providers/ProviderRegistry.js";
-import { IProvider } from "../../src/types/IProvider.js";
+import { describe, it, beforeEach, expect } from "vitest";
+import { ProviderRegistry } from "../../providers/ProviderRegistry.js";
+import { IProvider } from "../../types/IProvider.js";
 
 describe("ProviderRegistry", () => {
     beforeEach(() => {

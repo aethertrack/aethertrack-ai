@@ -18,6 +18,7 @@ export interface IProviderConfig<TModel extends IModelConfig = IModelConfig> {
     name: string;
     apiKey?: string;
     defaultModel: string;
+    providerConfig?: Record<string, any>;
     models: Record<string, TModel>;
 }
 
@@ -25,6 +26,7 @@ export interface IProviderConfig<TModel extends IModelConfig = IModelConfig> {
  * Top level config interface for the application including default provider and all provider configs
  */
 export interface IAppConfig<IProviders extends Record<string, any>> {
+    appConfig?: Record<string, any>;
     defaultProvider: keyof IProviders & string;
     providers: IProviders;
 }
