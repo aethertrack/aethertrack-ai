@@ -14,18 +14,26 @@ export enum AIProviderType {
  * Defines the standard contract that every ai provider (OpenAI, Anthropic, etc.)
  * must implement. It ensures a uniform API across all models and providers.
  */
-export interface IProvider<TConfig extends IProviderConfig = IProviderConfig> {
+export interface IProvider<
+    TConfig extends IProviderConfig = IProviderConfig,
+    TGenTextOptions extends Record<string, any> = Record<string, any>,
+    TEmbedOptions extends Record<string, any> = Record<string, any>,
+    TCompletionOptions extends Record<string, any> = Record<string, any>,
+    TStreamOptions extends Record<string, any> = Record<string, any>,
+    TImageOptions extends Record<string, any> = Record<string, any>,
+    TAudioOptions extends Record<string, any> = Record<string, any>> {
+
     /**
      * Type of ai provider (ie: openai, anthropic, etc.)
      */
     readonly type: AIProviderType;
-    
+
     /** 
      * Initialize the provider with necessary configuration
      * 
      * @param config Configuration object specific to the provider
      * @returns Promise that resolves when initialization is complete
-     */     
+     */
     init(config: TConfig): Promise<void>;
 
     /**
@@ -35,8 +43,17 @@ export interface IProvider<TConfig extends IProviderConfig = IProviderConfig> {
      * @param model Optional model name to use (overrides defaultModel in config)
      * @param options Optional parameters specific to the model
      * @returns Promise resolving to the generated response object
-     */    
-    generateText?(prompt: string, model?: string, options?: Partial<IModelConfig["genOptions"]>): Promise<any>;
+     */
+    generateText?(prompt: string, model?: string, options?: Partial<TGenTextOptions>): Promise<any>;
+
+    /**
+     * Generate text using non-chat / legacy completion models
+     * 
+     * @param prompt The text input to send to the model
+     * @param model Optional model name to use (overrides defaultModel in config)
+     * @param options Optional parameters specific to the model
+     */
+    generateCompletion?(prompt: string, model?: string, options?: Partial<TCompletionOptions>): Promise<any>;
 
     /**
      * Streams text generation from the model in chunks.
@@ -46,15 +63,40 @@ export interface IProvider<TConfig extends IProviderConfig = IProviderConfig> {
      * @param model Optional model name to use (overrides defaultModel in config)
      * @param options Optional parameters specific to the model
      */
-    stream?(prompt: string, onChunk: (chunk: any) => void, model?: string, options?: Partial<IModelConfig["streamOptions"]>): Promise<void>;
+    stream?(prompt: string, onChunk: (chunk: any) => void, model?: string, options?: Partial<TStreamOptions>): Promise<void>;
 
     /**
-     * Queries the provider to generate embeddings for the given prompt.
+     * Queries the provider to generate vector embeddings for the given prompt.
      * 
      * @param prompt The text input to send to the model
      * @param model Optional model name to use (overrides defaultModel in config)
      * @param options Optional parameters specific to the model
      * @returns Promise resolving to the generated response object
      */
-    embed?(prompt: string, model?: string, options?: Partial<IModelConfig["embedOptions"]>): Promise<any>;    
+    embed?(prompt: string, model?: string, options?: Partial<TEmbedOptions>): Promise<any>;
+
+    /**
+     * Generate an image based on a text prompt.
+     * @param prompt Text description for the image.
+     * @param model Optional model name (overrides default).
+     * @param options Optional image generation parameters.
+     */
+    generateImage?(prompt: string, model?: string, options?: Partial<TImageOptions>): Promise<any>;
+
+    /**
+     * Edit an existing image using a text prompt.
+     * @param image Source image to modify.
+     * @param prompt Text prompt describing desired edit.
+     * @param model Optional model name (overrides default).
+     * @param options Optional image edit parameters.
+     */
+    editImage?(image: any, prompt: string, model?: string, options?: Partial<TImageOptions>): Promise<any>;
+
+    /**
+     * Process or transcribe audio input.
+     * @param audio The audio data or file to process.
+     * @param model Optional model name (overrides default).
+     * @param options Optional audio processing parameters.
+     */
+    processAudio?(audio: any, model?: string, options?: Partial<TAudioOptions>): Promise<any>;
 }

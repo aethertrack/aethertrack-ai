@@ -20,7 +20,7 @@ export class HuggingFaceProvider implements IProvider<IProviderConfig> {
     async generateText(
         prompt: string,
         model?: string,
-        options?: Partial<IModelConfig["genOptions"]>): Promise<any> {
+        options?: Partial<IModelConfig["genTextOptions"]>): Promise<any> {
 
         // make sure the provider is initialized and ready
         if (!this.client || !this.config) {

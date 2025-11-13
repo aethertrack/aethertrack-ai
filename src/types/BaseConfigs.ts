@@ -1,25 +1,34 @@
+import { AIProviderType } from "./IProvider";
+
 /**
  * Base configuration interface for AI providers and per model options.
  */
 export interface IModelConfig<
-    TGen extends Record<string, any> = Record<string, any>,
-    TEmbed extends Record<string, any> = Record<string, any>,
-    TStream extends Record<string, any> = Record<string, any>
+    TChatOptions extends Record<string, any> = Record<string, any>,
+    TCompletionOptions extends Record<string, any> = Record<string, any>,
+    TStreamOptions extends Record<string, any> = Record<string, any>,
+    TEmbedOptions extends Record<string, any> = Record<string, any>,        
+    TImageOptions extends Record<string, any> = Record<string, any>,
+    TAudioOptions extends Record<string, any> = Record<string, any>    
 > {
-    genOptions?: TGen;
-    embedOptions?: TEmbed;
-    streamOptions?: TStream;
+    chatOptions?: TChatOptions;
+    streamOptions?: TStreamOptions;
+    completionOptions?: TCompletionOptions;    
+    embedOptions?: TEmbedOptions;
+    imageOptions?: TImageOptions;
+    audioOptions?: TAudioOptions;
 }
 
 /**
  * Base configuration interface for AI providers including name, apiKey and per model configs
  */
 export interface IProviderConfig<TModel extends IModelConfig = IModelConfig> {
-    name: string;
+    name: AIProviderType;
     apiKey?: string;
     defaultModel: string;
-    providerConfig?: Record<string, any>;
+    providerConfigOptions?: Record<string, any>;
     models: Record<string, TModel>;
+    [key: string]: any;
 }
 
 /**
@@ -29,4 +38,17 @@ export interface IAppConfig<IProviders extends Record<string, any>> {
     appConfig?: Record<string, any>;
     defaultProvider: keyof IProviders & string;
     providers: IProviders;
+    [key: string]: any;
+}
+
+/**
+ * Enumeration of model option keys for merging configurations
+ */
+export enum ModelOptionKey {
+    chatOptions = "chatOptions",
+    Completion = "completionOptions",
+    Stream = "streamOptions",
+    Embed = "embedOptions",
+    Image = "imageOptions",
+    Audio = "audioOptions",
 }

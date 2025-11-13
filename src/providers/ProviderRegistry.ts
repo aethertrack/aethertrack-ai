@@ -2,7 +2,7 @@ import { IProviderConfig } from "../types/BaseConfigs.js";
 import { IProvider } from "../types/IProvider.js";
 
 /**
- * Registry for AI providers.
+ * Factory for registring for AI providers.
  * Supports lazy loading and dynamic creation.
  */
 export type ProviderFactory = (config: IProviderConfig) => Promise<IProvider>;
@@ -46,6 +46,17 @@ export class ProviderRegistry {
     }
 
     /**
+     * Get the provider factory function by name (without instantiating)
+     * Useful for introspection, debugging, or delayed creation.
+     * 
+     * @param name Provider name
+     * @returns ProviderFactory or undefined
+     */
+    static getProviderFactory(name: string): ProviderFactory | undefined {
+        return this.providers.get(name);
+    }
+
+    /**
      * Check if a provider has been registered.
      * 
      * @param providerName name of the provider to check for
@@ -67,6 +78,7 @@ export class ProviderRegistry {
 
     /**
      * List registered provider names
+     * 
      * @returns array of registered provider names
      */
     static listProviders(): string[] {

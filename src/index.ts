@@ -8,14 +8,14 @@ function registerProviders() {
     // Lazy load OpenAI
     ProviderRegistry.registerProvider("openai", async (config:IProviderConfig) => {
         console.log("Loading OpenAI provider module...");
-        const { OpenAIProvider } = await import("./providers/OpenAIProvider.js");
+        const { OpenAIProvider } = await import("./providers/openai/OpenAIProvider.js");
         const openAi = new OpenAIProvider();
         await openAi.init(config);
         return openAi;
     });
 
     // Lazy load Anthropic
-    ProviderRegistry.registerProvider("anthropic", async (config:IProviderConfig) => {
+  /*  ProviderRegistry.registerProvider("anthropic", async (config:IProviderConfig) => {
         console.log("Loading AnthropicProvider provider module...");
         const { AnthropicProvider } = await import("./providers/AnthropicProvider.js");
         const anthropic = new AnthropicProvider();
@@ -30,7 +30,7 @@ function registerProviders() {
         const hfProvider = new HuggingFaceProvider();
         await hfProvider.init(config);
         return hfProvider;
-    });     
+    });   */  
 }
 
 async function main() {
@@ -102,7 +102,7 @@ async function main() {
     console.log(resultString);*/
 
 //-----------------hf
-    const providerName = "huggingface";
+    /*const providerName = "huggingface";
     const providerConfig = appConfig.providers[providerName]
     const provider:IProvider = await ProviderRegistry.createProvider(providerName, providerConfig);
 
@@ -113,7 +113,7 @@ async function main() {
     const result = await provider.generateText("Write a short story about a brave little toaster.");
 
     console.log(`Generated response from ${providerName}:`);
-    console.log(JSON.stringify(result, null, 2));
+    console.log(JSON.stringify(result, null, 2));*/
 
     console.log("-------------------");
 }
