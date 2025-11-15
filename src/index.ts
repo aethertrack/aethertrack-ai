@@ -2,12 +2,13 @@ import dotenv from "dotenv";
 import { IAppConfig, IProviderConfig } from "./types/BaseConfigs.js";
 import { loadAppConfig } from "./config/ConfigLoader.js";
 import { ProviderRegistry } from "./providers/ProviderRegistry.js";
-import { IProvider } from "./types/IProvider.js";
+import { AIProviderType, IProvider } from "./types/IProvider.js";
+import { ProviderManager } from "./providers/ProviderManager.js";
 
 function registerProviders() {
     // Lazy load OpenAI
-    ProviderRegistry.registerProvider("openai", async (config:IProviderConfig) => {
-        console.log("Loading OpenAI provider module...");
+    ProviderRegistry.registerProvider(AIProviderType.OpenAI, async (config:IProviderConfig) => {
+        console.log(`Loading provider module for provider: ${AIProviderType.OpenAI}`);
         const { OpenAIProvider } = await import("./providers/openai/OpenAIProvider.js");
         const openAi = new OpenAIProvider();
         await openAi.init(config);
@@ -16,7 +17,7 @@ function registerProviders() {
 
     // Lazy load Anthropic
   /*  ProviderRegistry.registerProvider("anthropic", async (config:IProviderConfig) => {
-        console.log("Loading AnthropicProvider provider module...");
+        console.log(`Loading provider module for provider: ${AIProviderType.Anthropic}`);
         const { AnthropicProvider } = await import("./providers/AnthropicProvider.js");
         const anthropic = new AnthropicProvider();
         await anthropic.init(config);
@@ -25,7 +26,7 @@ function registerProviders() {
 
     // Lazy load HuggingFace
     ProviderRegistry.registerProvider("huggingface", async (config:IProviderConfig) => {
-        console.log("Loading HuggingFaceProvider provider module...");
+        console.log(`Loading provider module for provider: ${AIProviderType.HuggingFace}`);
         const { HuggingFaceProvider } = await import("./providers/HuggingFaceProvider.js");
         const hfProvider = new HuggingFaceProvider();
         await hfProvider.init(config);
@@ -40,10 +41,37 @@ async function main() {
 
     console.log(`Configuration loaded for environment: ${process.env.NODE_ENV || 'development'}`);
 
-    console.log(appConfig);
-
     console.log("Registering providers...");
+    
     registerProviders();
+
+    console.log("Getting OpenAI provider instance...");
+
+    const openai1 = await ProviderRegistry.createProvider(
+        AIProviderType.OpenAI,
+        appConfig.providers.openai.connection1
+    );
+
+    //console.log("openai1", JSON.stringify(openai1, null, 2));
+
+    const result = await openai1.generateText!("hello from connection1");
+
+    console.log(result);
+
+    /*const openai1 = await ProviderManager.getProvider(AIProviderType.OpenAI, {
+        name: AIProviderType.OpenAI,
+        apiKey: process.env.OPENAI_API_KEY_1,
+        defaultModel: "gpt-4",
+        models: {
+            "gpt-4": {},
+        },
+    }, "1");
+
+    const result = await openai1.generateText!("Hello from key1");
+
+    console.log(result);*/
+
+    //const result = await provider.generateText("Write a haiku about lazy loading.");
 
     /*const providerName = appConfig.defaultProvider;
     const providerConfig = appConfig.providers[providerName];

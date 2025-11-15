@@ -1,5 +1,5 @@
 import { IProviderConfig } from "../types/BaseConfigs.js";
-import { IProvider } from "../types/IProvider.js";
+import { AIProviderType, IProvider } from "../types/IProvider.js";
 
 /**
  * Factory for registring for AI providers.
@@ -12,68 +12,56 @@ export type ProviderFactory = (config: IProviderConfig) => Promise<IProvider>;
  * Allows dynamic registration and creation of AI provider instances in a plugin type system
  */
 export class ProviderRegistry {
-    // Maps provider to its factory function
-    private static providers: Map<string, ProviderFactory> = new Map();
+    // Maps providers to its factory function
+    private static registry: Map<AIProviderType, ProviderFactory> = new Map();
 
     /**
      * Register a new provider factory with the registry.
-     * Registers the provider lazily.
      * 
-     * @param providerName name of the provider to register
+     * @param providerType type of the provider to register
      * @param factory factory function to create the provider instance 
      */
-    static registerProvider(providerName: string, factory: ProviderFactory): void {
-        if (this.providers.has(providerName)) {
-            console.warn(`Provider '${providerName}' already registered — overwriting.`);
+    static registerProvider(providerType: AIProviderType, factory: ProviderFactory): void {
+        if (this.registry.has(providerType)) {
+            console.warn(`ProviderRegistry: Provider type '${providerType}' already registered — overwriting.`);
         }        
-        this.providers.set(providerName, factory);
+        this.registry.set(providerType, factory);
     }
 
     /**
-     * Create a provider instance by name
+     * Create a provider instance from a given type and config
      * 
-     * @param name provider name to create
-     * @param config IProviderConfig for the provider instance
-     * @throws Error if provider name not found
-     * @returns Prmose resolving to the IProvider instance
+     * @param providerType Provider type to create
+     * @param config Configuration for the provider
+     * @throws Error if provider not registered
+     * @returns ProviderFactory
      */
-    static async createProvider(name: string, config: IProviderConfig): Promise<IProvider> {
-        const factory = this.providers.get(name);
+    static createProvider(providerType: AIProviderType, config: IProviderConfig): Promise<IProvider> {
+        const factory = this.registry.get(providerType);
         if (!factory) {
-            throw new Error(`Provider ${name} not registered`);
+            throw new Error(`ProviderRegistry: Provider type '${providerType}' not registered.`);
         }
         return factory(config);
     }
 
     /**
-     * Get the provider factory function by name (without instantiating)
-     * Useful for introspection, debugging, or delayed creation.
-     * 
-     * @param name Provider name
-     * @returns ProviderFactory or undefined
-     */
-    static getProviderFactory(name: string): ProviderFactory | undefined {
-        return this.providers.get(name);
-    }
-
-    /**
      * Check if a provider has been registered.
      * 
-     * @param providerName name of the provider to check for
+     * @param providerType type of the provider to check for
      * @returns true if provider is registered, false otherwise
      */
-    static hasProvider(providerName: string): boolean {
-        return this.providers.has(providerName);
+    static hasProvider(providerType: AIProviderType): boolean {
+        return this.registry.has(providerType);
     }
     
     /**
      * Unregister a previously registered provider
      * 
-     * @param providerName provider name to unregister
+     * @param providerType provider type to unregister
      * @returns true if the provider has been deleted from the registry
      */
-    static unregisterProvider(providerName: string): boolean {
-        return this.providers.delete(providerName);
+    static unregisterProvider(providerType: AIProviderType): boolean {
+        return this.registry.delete(providerType);
     }
 
     /**
@@ -82,6 +70,6 @@ export class ProviderRegistry {
      * @returns array of registered provider names
      */
     static listProviders(): string[] {
-        return Array.from(this.providers.keys());
+        return Array.from(this.registry.keys());
     }        
 }

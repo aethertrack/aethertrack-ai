@@ -1,4 +1,5 @@
-import { IModelConfig, IProviderConfig } from "./BaseConfigs.js";
+import { AIResponse } from "./AIResponseOutput.js";
+import { IProviderConfig } from "./BaseConfigs.js";
 
 /**
  * Enumeration of supported AI Provider types
@@ -12,11 +13,11 @@ export enum AIProviderType {
 /**
  * Standardized interface for AI Providers that each provider must implement
  * Defines the standard contract that every ai provider (OpenAI, Anthropic, etc.)
- * must implement. It ensures a uniform API across all models and providers.
+ * must implement. It ensures a uniform API across all providers.
  */
 export interface IProvider<
     TConfig extends IProviderConfig = IProviderConfig,
-    TGenTextOptions extends Record<string, any> = Record<string, any>,
+    TChatOptions extends Record<string, any> = Record<string, any>,
     TEmbedOptions extends Record<string, any> = Record<string, any>,
     TCompletionOptions extends Record<string, any> = Record<string, any>,
     TStreamOptions extends Record<string, any> = Record<string, any>,
@@ -44,7 +45,7 @@ export interface IProvider<
      * @param options Optional parameters specific to the model
      * @returns Promise resolving to the generated response object
      */
-    generateText?(prompt: string, model?: string, options?: Partial<TGenTextOptions>): Promise<any>;
+    generateText?(prompt: string, model?: string, options?: Partial<TChatOptions>): Promise<AIResponse>;
 
     /**
      * Generate text using non-chat / legacy completion models
@@ -53,7 +54,7 @@ export interface IProvider<
      * @param model Optional model name to use (overrides defaultModel in config)
      * @param options Optional parameters specific to the model
      */
-    generateCompletion?(prompt: string, model?: string, options?: Partial<TCompletionOptions>): Promise<any>;
+    generateCompletion?(prompt: string, model?: string, options?: Partial<TCompletionOptions>): Promise<AIResponse>;
 
     /**
      * Streams text generation from the model in chunks.
@@ -63,7 +64,7 @@ export interface IProvider<
      * @param model Optional model name to use (overrides defaultModel in config)
      * @param options Optional parameters specific to the model
      */
-    stream?(prompt: string, onChunk: (chunk: any) => void, model?: string, options?: Partial<TStreamOptions>): Promise<void>;
+    stream?(prompt: string, onChunk: (chunk: any) => void, model?: string, options?: Partial<TStreamOptions>): Promise<AIResponse>;
 
     /**
      * Queries the provider to generate vector embeddings for the given prompt.
@@ -73,7 +74,7 @@ export interface IProvider<
      * @param options Optional parameters specific to the model
      * @returns Promise resolving to the generated response object
      */
-    embed?(prompt: string, model?: string, options?: Partial<TEmbedOptions>): Promise<any>;
+    embed?(prompt: string, model?: string, options?: Partial<TEmbedOptions>): Promise<AIResponse>;
 
     /**
      * Generate an image based on a text prompt.
@@ -81,7 +82,7 @@ export interface IProvider<
      * @param model Optional model name (overrides default).
      * @param options Optional image generation parameters.
      */
-    generateImage?(prompt: string, model?: string, options?: Partial<TImageOptions>): Promise<any>;
+    generateImage?(prompt: string, model?: string, options?: Partial<TImageOptions>): Promise<AIResponse>;
 
     /**
      * Edit an existing image using a text prompt.
@@ -90,7 +91,7 @@ export interface IProvider<
      * @param model Optional model name (overrides default).
      * @param options Optional image edit parameters.
      */
-    editImage?(image: any, prompt: string, model?: string, options?: Partial<TImageOptions>): Promise<any>;
+    editImage?(image: any, prompt: string, model?: string, options?: Partial<TImageOptions>): Promise<AIResponse>;
 
     /**
      * Process or transcribe audio input.
@@ -98,5 +99,5 @@ export interface IProvider<
      * @param model Optional model name (overrides default).
      * @param options Optional audio processing parameters.
      */
-    processAudio?(audio: any, model?: string, options?: Partial<TAudioOptions>): Promise<any>;
+    processAudio?(audio: any, model?: string, options?: Partial<TAudioOptions>): Promise<AIResponse>;
 }

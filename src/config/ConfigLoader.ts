@@ -18,31 +18,42 @@ export function loadAppConfig(): IAppConfig<Record<string, IProviderConfig>> {
     const parsed = rawConfig as IAppConfig<Record<string, IProviderConfig>>;
 
     // Minimal validations
-    if (!parsed.defaultProvider) {
-        throw new Error("defaultProvider must be defined in config");
-    }
-
     if (!parsed.providers || Object.keys(parsed.providers).length === 0) {
         throw new Error("At least one provider must be defined in config");
     }
 
-    // Merge provider defaults into per-provider api keys from environment variables
-    for (const provider of Object.values(parsed.providers)) {
-        const p = provider as IProviderConfig;
-        
-        // Make sure at least 1 model is defined
-        if (!p.models || Object.keys(p.models).length === 0) {
-            throw new Error(`Provider ${p.name} must define at least one model`);
-        }        
+    const appConfig: Record<string, any> = parsed.appConfig || {};    
+    const resolvedProviders: Record<string, Record<string, IProviderConfig>> = {};
 
-        // Inject environment API key if missing
-        if (!p.apiKey) {
-            const envVar = `${p.name.toUpperCase()}_API_KEY`;
-            if (process.env[envVar]) {
-                p.apiKey = process.env[envVar];
+    // For each provider type in config
+    for (const providerType of Object.keys(parsed.providers)) {
+        const connections = parsed.providers[providerType];
+        
+        resolvedProviders[providerType] = {};
+
+        // For each connection under the provider type
+        for (const connectionName of Object.keys(connections)) {
+            const connectionConfig = connections[connectionName] as IProviderConfig;        
+
+            // Resolve API key env variable
+            const apiKeyEnvVar = connectionConfig.apiKeyEnvVar;
+            if (!apiKeyEnvVar) {
+                throw new Error(`Provider '${providerType}' connection '${connectionName}' missing 'apiKeyEnvVar'`);
             }
+
+            // Resolve the api key from environment vars
+            const apiKey = process.env[apiKeyEnvVar];
+            if (!apiKey) {
+                throw new Error(`Environment variable '${apiKeyEnvVar}' not set for provider '${providerType}' connection '${connectionName}'`);
+            }
+            
+            // Construct final provider config
+            resolvedProviders[providerType][connectionName] = {
+                ...connectionConfig,
+                apiKey, // Inject the actual key
+            };            
         }
     }
 
-    return parsed as IAppConfig<Record<string, IProviderConfig>>;
+    return {appConfig, providers: resolvedProviders} as IAppConfig<Record<string, IProviderConfig>>;
 }

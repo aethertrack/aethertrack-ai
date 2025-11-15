@@ -1,4 +1,4 @@
-import { AIProviderType } from "./IProvider";
+import { AIProviderType } from "./IProvider.js";
 
 /**
  * Base configuration interface for AI providers and per model options.
@@ -11,6 +11,7 @@ export interface IModelConfig<
     TImageOptions extends Record<string, any> = Record<string, any>,
     TAudioOptions extends Record<string, any> = Record<string, any>    
 > {
+    roles: ModelRole[];
     chatOptions?: TChatOptions;
     streamOptions?: TStreamOptions;
     completionOptions?: TCompletionOptions;    
@@ -23,9 +24,10 @@ export interface IModelConfig<
  * Base configuration interface for AI providers including name, apiKey and per model configs
  */
 export interface IProviderConfig<TModel extends IModelConfig = IModelConfig> {
-    name: AIProviderType;
+    type: AIProviderType;
+    apiKeyEnvVar?: string;
     apiKey?: string;
-    defaultModel: string;
+    defaultModel?: string;
     providerConfigOptions?: Record<string, any>;
     models: Record<string, TModel>;
     [key: string]: any;
@@ -36,16 +38,26 @@ export interface IProviderConfig<TModel extends IModelConfig = IModelConfig> {
  */
 export interface IAppConfig<IProviders extends Record<string, any>> {
     appConfig?: Record<string, any>;
-    defaultProvider: keyof IProviders & string;
     providers: IProviders;
-    [key: string]: any;
+}
+
+/**
+ * Enumeration of model types / roles
+ */
+export enum ModelRole {
+    Chat = "chat",
+    Completion = "completion",
+    Embed = "embed",
+    Image = "image",
+    Audio = "audio",
+    Stream = "stream"
 }
 
 /**
  * Enumeration of model option keys for merging configurations
  */
 export enum ModelOptionKey {
-    chatOptions = "chatOptions",
+    ChatOptions = "chatOptions",
     Completion = "completionOptions",
     Stream = "streamOptions",
     Embed = "embedOptions",

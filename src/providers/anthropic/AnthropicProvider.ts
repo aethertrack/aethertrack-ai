@@ -1,8 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
 
-import { AIProviderType, IProvider } from "../types/IProvider.js";
-import { IModelConfig, IProviderConfig } from '../types/BaseConfigs.js';
-
+import { AIProviderType, IProvider } from "../../types/IProvider.js";
+import { IModelConfig, IProviderConfig } from '../../types/BaseConfigs.js';
+/*
 export class AnthropicProvider implements IProvider {
     type = AIProviderType.Anthropic;
 
@@ -70,3 +70,4 @@ export class AnthropicProvider implements IProvider {
         }
     }
 }
+*/

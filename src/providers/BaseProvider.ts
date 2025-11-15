@@ -1,4 +1,4 @@
-import { IProviderConfig, IModelConfig, ModelOptionKey } from "../types/BaseConfigs.js";
+import { IProviderConfig, IModelConfig, ModelOptionKey, ModelRole } from "../types/BaseConfigs.js";
 
 /**
  * BaseProvider provides shared helper methods for all AI providers.
@@ -36,27 +36,114 @@ export abstract class BaseProvider<TConfig extends IProviderConfig = IProviderCo
     }
 
     /**
+     * Find the default model for a given role from the provider config.
+     * 
+     * @param providerConfig provider configuration
+     * @param role role to find the model for
+     * @returns model name associated with the given role
+     */
+    protected getDefaultModelForRole(providerConfig: IProviderConfig, role: ModelRole): string | null {
+        const models = providerConfig.models;
+        for (const modelName in models) {
+            const modelConfig = models[modelName];
+            if (modelConfig.roles?.includes(role)) {
+                return modelName;
+            }
+        }
+        return null;
+    }    
+
+    /**
      * Generic helper to validate and merge model options safely.
      * 
      * @param model Name of the model to use 
      * @param options Optional runtime option overrides to use
      * @param key The specific option key to merge (ie: chatOptions, streamOptions, etc.)
+     * @param role Optional role to find default model if model not provided
      * @returns Object containing modelToUse, modelConfig, and mergedOptions
+     * @throws Error if model not found or provider not initialized
      */
     protected prepareModelOptions<TModelOptions extends Record<string, any>>(
-        model: string | undefined,
-        options: Partial<TModelOptions> | undefined,
-        key: ModelOptionKey
+        model?: string,
+        options?: Partial<TModelOptions>,
+        key?: ModelOptionKey,
+        role?: ModelRole
     ): { modelToUse: string; modelConfig: IModelConfig; mergedOptions: Partial<TModelOptions> } {
+        
         this.ensureInitialized();
 
-        const modelToUse = model || this.config!.defaultModel;
-        const modelConfig = this.config!.models[modelToUse];
-        if (!modelConfig) {
-            throw new Error(`Model ${modelToUse} not found`);
+        // Determine the model to use
+        let modelToUse = model;
+
+        if(!modelToUse && role) {
+            modelToUse = this.getDefaultModelForRole(this.config!, role) || undefined;
         }
 
-        const mergedOptions = (this.mergeConfig(modelConfig, options, key) || {}) as Partial<TModelOptions>;
+        // Fallback to provider's default model
+        if (!modelToUse) {
+            modelToUse = this.config!.defaultModel;
+        }
+
+        if (!modelToUse) {
+            throw new Error(`No model found for role ${role ?? "unknown"} in provider config`);
+        }        
+
+        // Fetch the model configuration from provider config
+        const modelConfig = this.config!.models[modelToUse];
+        if (!modelConfig) {
+            throw new Error(`Model '${modelToUse}' not found in provider config`);
+        }
+
+        // Validate role
+        if (role && !modelConfig.roles.includes(role)) {
+
+            // Get all models that support the role
+            const available = Object.entries(this.config!.models)
+                .filter(([, cfg]) => cfg.roles.includes(role))
+                .map(([name]) => name);
+            
+            // Create string suggestion message
+            const suggestion = available.length > 0
+                ? `\nModels supporting '${role}': ${available.join(", ")}`
+                : `\n(No models in this provider support role '${role}')`;                
+
+            throw new Error(
+                `Model '${modelToUse}' does NOT support required role '${role}'.\n` +
+                `Supported roles for '${modelToUse}': ${modelConfig.roles.join(", ")}${suggestion}`
+            );
+        }        
+
+        // Select the correct default options based on key
+        let defaultOptions: Partial<TModelOptions> = {};
+        if (key) {
+            switch (key) {
+                case ModelOptionKey.ChatOptions:
+                    defaultOptions = (modelConfig.chatOptions ?? {}) as Partial<TModelOptions>;
+                    break;
+                case ModelOptionKey.Completion:
+                    defaultOptions = (modelConfig.completionOptions ?? {}) as Partial<TModelOptions>;
+                    break;
+                case ModelOptionKey.Stream:
+                    defaultOptions = (modelConfig.streamOptions ?? {}) as Partial<TModelOptions>;
+                    break;
+                case ModelOptionKey.Embed:
+                    defaultOptions = (modelConfig.embedOptions ?? {}) as Partial<TModelOptions>;
+                    break;
+                case ModelOptionKey.Image:
+                    defaultOptions = (modelConfig.imageOptions ?? {}) as Partial<TModelOptions>;
+                    break;
+                case ModelOptionKey.Audio:
+                    defaultOptions = (modelConfig.audioOptions ?? {}) as Partial<TModelOptions>;
+                    break;
+                default:
+                    defaultOptions = {};
+            }
+        }        
+
+        // Merge default model options with runtime overrides
+        const mergedOptions = { ...defaultOptions, ...(options ?? {}) };
+
         return { modelToUse, modelConfig, mergedOptions };
+      
     }
 }

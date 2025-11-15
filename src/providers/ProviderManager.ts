@@ -1,86 +1,85 @@
 import { ProviderRegistry } from "./ProviderRegistry.js";
-import { IProvider } from "../types/IProvider.js";
+import { AIProviderType, IProvider } from "../types/IProvider.js";
 import { IProviderConfig } from "../types/BaseConfigs.js";
 
 /**
  * Manages active provider instances at runtime.
  * 
- * Uses ProviderRegistry factories for creation,
- * but caches initialized providers for reuse.
+ * Uses ProviderRegistry factories for creation, but caches initialized providers for reuse.
  */
 export class ProviderManager {
-    // Store active provider instances
-    private static instances: Map<string, IProvider> = new Map();
+    // Store active provider instances using providerType and instanceKey as key
+    // Key format: `${providerType}:${connectionName}`
+    private static providerCache: Map<string, IProvider> = new Map();
 
     /**
-     * Get an existing provider instance, or lazily create one.
+     * Get an existing provider instance, or lazily create one if needed.
      * 
-     * @param name provider key, e.g. "openai"
+     * @param providerType provider type, e.g. "openai"
+     * @param connectionName the connection name in the config 
      * @param config config for initialization (used if creating)
+     * @param useCache whether to cache the instance (default true)
      * @returns Promise resolving to the IProvider instance
      * @throws Error if provider not registered
      */
-    static async getProvider(name: string, config: IProviderConfig): Promise<IProvider> {
+    static async getProvider(providerType: AIProviderType, connectionName: string, config: IProviderConfig, useCache: boolean = true): Promise<IProvider> {
+        // cache key for the provider instance
+        const cacheKey = `${providerType}:${connectionName}`; // provider unique cache key
+
         // Return cached instance if available
-        if (this.instances.has(name)) {
-            return this.instances.get(name)!;
+        if (useCache && this.providerCache.has(cacheKey)) {
+            return this.providerCache.get(cacheKey)!;
         }
-
+        
         // Lazily create provider using registry
-        if (!ProviderRegistry.hasProvider(name)) {
-            throw new Error(`Provider '${name}' not registered.`);
+        if (!ProviderRegistry.hasProvider(providerType)) {
+            throw new Error(`Provider type '${providerType}' not registered in ProviderRegistry`);
+        }        
+        
+        const provider = await ProviderRegistry.createProvider(providerType, config);
+
+        if (useCache) {
+            this.providerCache.set(cacheKey, provider);
         }
 
-        const provider = await ProviderRegistry.createProvider(name, config);
-        this.instances.set(name, provider);
         return provider;
     }
 
     /**
-     * Check if a provider instance already exists in cache
+     * Check if a provider instance exists in the cache
      * 
-     * @param name provider key
+     * @param providerType provider type to check
+     * @param connectionName name of the connection
+     * @returns true if provider instance exists, false otherwise
      */
-    static hasProviderInstance(name: string): boolean {
-        return this.instances.has(name);
+    static hasProviderInstance(providerType: AIProviderType, connectionName: string): boolean {
+        return this.providerCache.has(`${providerType}:${connectionName}`);
     }
 
     /**
-     * Remove a cached provider instance.
-     * Useful for refreshing or shutting down providers.
+     * List cached provider instances
+     * 
+     * @returns array of cached provider keys
      */
-    static async unloadProvider(name: string): Promise<void> {
-        if (this.instances.has(name)) {
-            const instance = this.instances.get(name)!;
-            // If provider implements a cleanup hook, call it
-            if (typeof (instance as any).shutdown === "function") {
-                await (instance as any).shutdown();
-            }
-            this.instances.delete(name);
-        }
+    static listCachedProviders(): string[] {
+        return Array.from(this.providerCache.keys());
+    }    
+
+    /**
+     * Clear a cached provider instance
+     * 
+     * @param providerType provider type to clear
+     * @param connectionName name of the connection to delete
+     * @returns true if the provider instance was deleted, false if not found
+     */
+    static clearProviderInstance(providerType: AIProviderType, connectionName: string): boolean {
+        return this.providerCache.delete(`${providerType}:${connectionName}`);
     }
 
     /**
-     * Reload a provider (destroy and recreate)
+     * Clear all cached provider instances
      */
-    static async reloadProvider(name: string, config: IProviderConfig): Promise<IProvider> {
-        await this.unloadProvider(name);
-        return this.getProvider(name, config);
-    }
-
-    /**
-     * List currently active provider instance keys
-     */
-    static listActiveProviders(): string[] {
-        return Array.from(this.instances.keys());
-    }
-
-    /**
-     * Remove all active providers (e.g., on app shutdown)
-     */
-    static async clearAll(): Promise<void> {
-        for (const name of this.instances.keys()) {
-            await this.unloadProvider(name);
-        }
-    }
+    static clearAll(): void {
+        this.providerCache.clear();
+    }    
 }

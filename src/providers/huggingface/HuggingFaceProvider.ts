@@ -1,7 +1,7 @@
 import { InferenceClient } from "@huggingface/inference";
-import { IModelConfig, IProviderConfig } from "../types/BaseConfigs.js";
-import { AIProviderType, IProvider } from "../types/IProvider.js";
-
+import { IModelConfig, IProviderConfig } from "../../types/BaseConfigs.js";
+import { AIProviderType, IProvider } from "../../types/IProvider.js";
+/*
 export class HuggingFaceProvider implements IProvider<IProviderConfig> {
     type: AIProviderType = AIProviderType.HuggingFace;
 
@@ -55,3 +55,4 @@ export class HuggingFaceProvider implements IProvider<IProviderConfig> {
         }
     }
 }
+*/

@@ -1,52 +1,96 @@
 {
-    "defaultProvider": "openai",
+    "appConfig": {},
     "providers": {
         "openai": {
-            "name": "openai",
-            "defaultModel": "gpt-5",
-            "models": {
-                "gpt-5": {
-                    "genOptions": {
-                        "max_output_tokens": 2048
+            "connection1": {                
+                "type": "openai",
+                "apiKeyEnvVar": "OPENAI_API_KEY_1",
+                "defaultModel": "gpt-5",
+                "models": {
+                    "gpt-5": {
+                        "roles": ["chat", "stream"],
+                        "embedOptions": {
+                            "encodingFormat": "float",
+                            "dimensions": 3072
+                        },
+                        "streamOptions": {}
                     },
-                    "embedOptions": {
-                        "encodingFormat": "float",
-                        "dimensions": 3072
+                    "text-embedding-3-large": {
+                        "roles": ["embed"],
+                        "embedOptions": {
+                            "encodingFormat": "float",
+                            "dimensions": 3072
+                        }
                     },
-                    "streamOptions": {}
-                },
-                "gpt-4": {
-                    "genOptions": {
-                        "temperature": 0.5,
-                        "max_output_tokens": 1024
-                    }
-                },
-                "text-embedding-3-large": {
-                    "embedOptions": {
-                        "encodingFormat": "float",
-                        "dimensions": 3072
+                    "gpt-3.5-turbo-instruct": {
+                        "roles": ["completion"],
+                        "completionOptions": {
+                            "max_tokens": 512
+                        }
+                    },
+                    "gpt-image-1": {
+                        "roles": ["image"],
+                        "imageOptions": {
+                            "size": "1024x1024",
+                            "n": 1
+                        }
                     }
                 }
-            }
+            },
+            "connection2": {
+                "type": "openai",
+                "apiKeyEnvVar": "OPENAI_API_KEY_2",
+                "defaultModel": "gpt-5",
+                "models": {
+                    "gpt-5": {
+                        "roles": ["chat", "completion", "stream"],
+                        "embedOptions": {
+                            "encodingFormat": "float",
+                            "dimensions": 3072
+                        },
+                        "streamOptions": {}
+                    },
+                    "text-embedding-3-large": {
+                        "roles": ["embed"],
+                        "embedOptions": {
+                            "encodingFormat": "float",
+                            "dimensions": 3072
+                        }
+                    },
+                    "gpt-3.5-turbo-instruct": {
+                        "roles": ["completion"],
+                        "completionOptions": {
+                            "max_tokens": 512
+                        }
+                    },
+                    "gpt-image-1": {
+                        "roles": ["image"],
+                        "imageOptions": {
+                            "size": "1024x1024",
+                            "n": 1
+                        }
+                    }
+                }
+            }            
         },
         "anthropic": {
-            "name": "anthropic",
-            "defaultModel": "claude-sonnet-4-5-20250929",
-            "models": {
-                "claude-sonnet-4-5-20250929": {
-                    "genOptions": {
-                        "max_tokens": 1024
+            "connection1": { 
+                "type": "anthropic",
+                "apiKeyEnvVar": "ANTHROPIC_API_KEY_1",                
+                "defaultModel": "claude-sonnet-4-5-20250929",
+                "models": {
+                    "claude-sonnet-4-5-20250929": {
                     }
                 }
             }
         },
         "huggingface": {
-            "name": "huggingface",
-            "defaultModel": "tiiuae/falcon-7b-instruct",
-            "models": {
-                "tiiuae/falcon-7b-instruct": {
-                    "genOptions": {
-                        "max_new_tokens": 50
+            "connection1": {
+                "type": "huggingface",
+                "apiKeyEnvVar": "HUGGINGFACE_API_KEY_1",            
+                "defaultModel": "tiiuae/falcon-7b-instruct",
+                "models": {
+                    "tiiuae/falcon-7b-instruct": {
                     }
                 }
             }

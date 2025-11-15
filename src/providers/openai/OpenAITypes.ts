@@ -7,7 +7,7 @@ import {
     ImageGenerateParams,
     ImageEditParams
 } from "openai/resources";
-import { IModelConfig, IProviderConfig } from "../../types/BaseConfigs";
+import { IModelConfig } from "../../types/BaseConfigs.js";
 
 /**
  * OpenAI-specific option types used by IProvider generics.
