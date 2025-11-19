@@ -1,7 +1,7 @@
 import OpenAI from "openai";
-import { IModelConfig, IProviderConfig, ModelOptionKey, ModelRole } from "../../types/BaseConfigs.js";
+import { IProviderConfig, ModelOptionKey, ModelRole } from "../../types/BaseConfigs.js";
 import { AIProviderType, IProvider } from "../../types/IProvider.js";
-import { OpenAITextCompletionOptions, OpenAIChatOptions, OpenAIEmbedOptions, OpenAIStreamOptions, OpenAIImageOptions, OpenAIAudioOptions } from "./OpenAITypes.js";
+import { OpenAITextCompletionOptions, OpenAIChatOptions, OpenAIEmbedOptions, OpenAIStreamOptions, OpenAIImageOptions, OpenAIAudioOptions, OpenAIVideoOptions } from "./OpenAITypes.js";
 import { BaseProvider } from "../BaseProvider.js";
 import { AIResponse } from "../../types/AIResponseOutput.js";
 
@@ -14,7 +14,8 @@ export class OpenAIProvider
         OpenAITextCompletionOptions,
         OpenAIStreamOptions,
         OpenAIImageOptions,
-        OpenAIAudioOptions
+        OpenAIAudioOptions,
+        OpenAIVideoOptions
     > {
 
     readonly type: AIProviderType = AIProviderType.OpenAI;
@@ -70,7 +71,7 @@ export class OpenAIProvider
         model?: string,
         options?: Partial<OpenAITextCompletionOptions>
     ): Promise<AIResponse<string>> {
-        
+
         console.warn("[openai] generateCompletion() uses legacy completions API. Prefer generateText().");
 
         try {
@@ -245,6 +246,42 @@ export class OpenAIProvider
         }
     }
 
+    async generateImageVariation(image: any, prompt: string, model?: string, options?: Partial<OpenAIImageOptions>): Promise<AIResponse<any>> {
+        try {
+            // Merge options with model config defaults    
+            const { modelToUse, mergedOptions } = this.prepareModelOptions<OpenAIImageOptions>(
+                model,
+                options as any,
+                ModelOptionKey.Image,
+                ModelRole.Image);
+
+            // Try images.edit with an `image` param and a variation prompt
+            const response = await this.client.images.edit({
+                model: modelToUse,
+                prompt: "Make a variation",
+                image,
+                ...mergedOptions
+            });
+
+            const item = response.data?.[0];
+            const output = item?.url ?? item?.b64_json ?? item ?? null;
+
+            return {
+                rawResponse: response,
+                output,
+                error: "",
+                metadata: {
+                    model: modelToUse,
+                    requestId:
+                        response.id
+                }
+            };
+
+        } catch (err: any) {
+            return { output: null, error: err?.message ?? String(err) };
+        }
+    }
+
     async processAudio(audio: any, model?: string, options?: Partial<OpenAIAudioOptions>): Promise<AIResponse<string>> {
         try {
             // Merge options with model config defaults    
@@ -275,4 +312,191 @@ export class OpenAIProvider
             return { output: "", error: err?.message ?? String(err) };
         }
     }
+
+    async generateSpeech(text: string, model?: string, options?: Partial<OpenAIAudioOptions>): Promise<AIResponse<Buffer>> {
+        try {
+            // Use same transcription endpoint with translate flag depending on support
+            const { modelToUse, mergedOptions } = this.prepareModelOptions<OpenAIAudioOptions>(model, options as any, ModelOptionKey.Audio, ModelRole.Audio);
+
+            const response = await this.client.audio.speech.create({
+                input: text,
+                model: modelToUse,
+                ...mergedOptions
+            });
+
+            // Some SDKs return base64, others return a Buffer/stream. Handle common cases.
+            const audioB64 = response?.audio ?? response?.b64_json ?? null;
+            const buffer = audioB64 ? Buffer.from(audioB64, "base64") : (response as Buffer);            
+
+            return { 
+                rawResponse: response, 
+                output: buffer, 
+                error: "", 
+                metadata: { 
+                    model: modelToUse, 
+                    requestId: response.id 
+                } 
+            };
+        } catch (err: any) {
+            return { output: Buffer.from([]), error: err?.message ?? String(err) };
+        }
+    }
+
+    async translateAudio(file: File, model?: string, options?: Partial<OpenAIAudioOptions>): Promise<AIResponse<string>> {
+        try {
+            // Use same transcription endpoint with translate flag depending on support
+            const { modelToUse, mergedOptions } = this.prepareModelOptions<OpenAIAudioOptions>(model, options as any, ModelOptionKey.Audio, ModelRole.Audio);
+
+            const response = await this.client.audio.transcriptions.create({
+                file,
+                model: modelToUse,
+                translate: true,
+                ...mergedOptions
+            });
+
+            return { 
+                rawResponse: response, 
+                output: response.text ?? "", 
+                error: "", 
+                metadata: { 
+                    model: modelToUse, 
+                    requestId: response.id 
+                } 
+            };
+        } catch (err: any) {
+            return { output: "", error: err?.message ?? String(err) };
+        }
+    }
+
+    async generateVideo(prompt: string, model?: string, options?: Record<string, any>): Promise<AIResponse<any>> {
+        try {
+            const { modelToUse, mergedOptions } = this.prepareModelOptions<OpenAIVideoOptions>(model, options as any, ModelOptionKey.Video, ModelRole.Video);
+
+            const createResponse = await this.client.videos.create({ model: modelToUse, prompt, ...mergedOptions });
+            console.log("Video generation started");
+
+            let video = {...createResponse};
+
+            // We have to wait until the client finishes creating the image
+            while(video.status === "in_progress" || video.status === "queued") {
+                video = await this.client.videos.retrieve(video.id);
+                const progress = video.progress ?? 0;
+                const statusText = video.status === 'queued' ? 'Queued' : 'Processing';
+
+                process.stdout.write(`\n${statusText}: ${progress.toFixed(1)}%`);
+
+                await new Promise((resolve) => setTimeout(resolve, 2000));
+            }
+            
+            process.stdout.write('\n');
+
+            if (video.status === 'failed') {
+                throw new Error('Video generation failed');
+            }
+
+            console.log('Video generation completed');
+
+            console.log('Downloading video content...');
+
+            const content = await this.client.videos.downloadContent(video.id);            
+
+            const body = content.arrayBuffer();
+            const buffer = Buffer.from(await body);            
+
+            return { 
+                rawResponse: createResponse, 
+                output: {
+                    content, 
+                    buffer
+                },
+                error: "", 
+                metadata: { 
+                    model: modelToUse, 
+                    requestId: createResponse.id 
+                } 
+            };
+        } catch (err: any) {
+            return { output: null, error: err?.message ?? String(err) };
+        }
+    }   
+    
+    async editVideo(prompt: string, videoRequestId: string, model?: string, options?: Partial<Partial<any>> | undefined): Promise<AIResponse<any>> {
+        try {
+            const { modelToUse, mergedOptions } = this.prepareModelOptions<OpenAIVideoOptions>(model, options as any, ModelOptionKey.Video, ModelRole.Video);
+
+            const createResponse = await this.client.videos.remix(videoRequestId, { prompt, ...mergedOptions });
+
+            console.log(createResponse);
+            console.log("Video generation started");
+
+            let video = {...createResponse};
+
+            // We have to wait until the client finishes creating the image
+            while(video.status === "in_progress" || video.status === "queued") {
+                video = await this.client.videos.retrieve(video.id);
+                const progress = video.progress ?? 0;
+                const statusText = video.status === 'queued' ? 'Queued' : 'Processing';
+
+                process.stdout.write(`\n${statusText}: ${progress.toFixed(1)}%`);
+
+                await new Promise((resolve) => setTimeout(resolve, 2000));
+            }
+            
+            process.stdout.write('\n');
+
+            if (video.status === 'failed') {
+                throw new Error('Video generation failed');
+            }
+
+            console.log('Video generation completed');
+
+            console.log('Downloading video content...');
+
+            const content = await this.client.videos.downloadContent(video.id);            
+
+            const body = content.arrayBuffer();
+            const buffer = Buffer.from(await body);            
+
+            return { 
+                rawResponse: createResponse, 
+                output: {
+                    content, 
+                    buffer
+                },
+                error: "", 
+                metadata: { 
+                    model: modelToUse, 
+                    requestId: createResponse.id 
+                } 
+            };
+        } catch (err: any) {
+            return { output: null, error: err?.message ?? String(err) };
+        }
+    }
+
+    async moderate(content: string | string[], model?: string, options?: Partial<Partial<any>> | undefined): Promise<AIResponse<any>> {
+        try {
+            // Use same transcription endpoint with translate flag depending on support
+            const { modelToUse, mergedOptions } = this.prepareModelOptions<OpenAIAudioOptions>(model, options as any, ModelOptionKey.Moderation, ModelRole.Moderation);
+
+            const response = await this.client.moderations.create({
+                model: modelToUse,
+                input: content,
+                ...mergedOptions
+            });
+
+            return { 
+                rawResponse: response, 
+                output: response.text ?? "", 
+                error: "", 
+                metadata: { 
+                    model: modelToUse, 
+                    requestId: 
+                    response.id 
+                } 
+            };
+        } catch (err: any) {
+            return { output: "", error: err?.message ?? String(err) };
+        }                
+    }    
 }

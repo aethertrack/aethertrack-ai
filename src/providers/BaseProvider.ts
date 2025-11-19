@@ -135,6 +135,12 @@ export abstract class BaseProvider<TConfig extends IProviderConfig = IProviderCo
                 case ModelOptionKey.Audio:
                     defaultOptions = (modelConfig.audioOptions ?? {}) as Partial<TModelOptions>;
                     break;
+                case ModelOptionKey.Video:
+                    defaultOptions = (modelConfig.videoOptions ?? {}) as Partial<TModelOptions>;
+                    break;             
+                case ModelOptionKey.Moderation:
+                    defaultOptions = (modelConfig.moderationOptions ?? {}) as Partial<TModelOptions>;
+                    break;                               
                 default:
                     defaultOptions = {};
             }

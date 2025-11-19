@@ -22,7 +22,9 @@ export interface IProvider<
     TCompletionOptions extends Record<string, any> = Record<string, any>,
     TStreamOptions extends Record<string, any> = Record<string, any>,
     TImageOptions extends Record<string, any> = Record<string, any>,
-    TAudioOptions extends Record<string, any> = Record<string, any>> {
+    TAudioOptions extends Record<string, any> = Record<string, any>,
+    TVideoOptions extends Record<string, any> = Record<string, any>,
+    TModerationOptions extends Record<string, any> = Record<string, any>> {
 
     /**
      * Type of ai provider (ie: openai, anthropic, etc.)
@@ -86,6 +88,7 @@ export interface IProvider<
 
     /**
      * Edit an existing image using a text prompt.
+     * 
      * @param image Source image to modify.
      * @param prompt Text prompt describing desired edit.
      * @param model Optional model name (overrides default).
@@ -94,10 +97,68 @@ export interface IProvider<
     editImage?(image: any, prompt: string, model?: string, options?: Partial<TImageOptions>): Promise<AIResponse>;
 
     /**
+     * Create an image variation
+     * 
+     * @param image Source image to modify.
+     * @param prompt Text prompt describing variation.
+     * @param model Optional model name (overrides default).
+     * @param options Optional image parameters.
+     */
+    generateImageVariation?(image: any, prompt: string, model?: string, options?: Partial<TImageOptions>): Promise<AIResponse<any>>;
+
+    /**
      * Process or transcribe audio input.
+     * 
      * @param audio The audio data or file to process.
      * @param model Optional model name (overrides default).
      * @param options Optional audio processing parameters.
      */
     processAudio?(audio: any, model?: string, options?: Partial<TAudioOptions>): Promise<AIResponse>;
+
+    /**
+     * Generate audio TTS from text input.
+     * 
+     * @param text The test to generate TTS
+     * @param model Optional model name (overrides default).
+     * @param options Optional audio processing parameters.
+     * @throws Error if ai client does not support TTS
+     */
+    generateSpeech?(text: string, model?: string|null, options?: Partial<TAudioOptions>): Promise<AIResponse<Buffer>>;
+
+    /**
+     * Generate a translation of the audo file
+     * 
+     * @param file The audio file to process.
+     * @param model Optional model name (overrides default).
+     * @param options Optional audio processing parameters.
+     */
+    translateAudio?(file: File, model?: string, options?: Partial<TAudioOptions>): Promise<AIResponse<string>>;
+
+    /**
+     * Generate a video from the specified prompt
+     * 
+     * @param prompt Text prompt that describes the video to generate.
+     * @param model Optional model name (overrides default).
+     * @param options Optional video processing parameters.
+     */
+    generateVideo?(prompt: string, model?: string, options?: Partial<TVideoOptions>): Promise<AIResponse<any>>;
+
+    /**
+     * Edit a video using the specified prompt
+     * 
+     * @param prompt Text prompt that describes the video modifications.
+     * @param videoRequestId Request of previously created video to modify
+     * @param model Optional model name (overrides default).
+     * @param options Optional video processing parameters.
+     */
+    editVideo?(prompt: string, videoRequestId: string, model?: string, options?: Partial<TVideoOptions>): Promise<AIResponse<any>>;    
+
+    /**
+     * Use either a provider-specified moderation model or the given model
+     * 
+     * @param content content to test
+     * @param model Optional model name (overrides default).
+     * @param options Optional moderation parameters.
+     */
+    moderate?(content: string | string[], model?: string, options?: Partial<TModerationOptions>): Promise<AIResponse<any>>;
 }

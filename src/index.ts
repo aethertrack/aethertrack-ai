@@ -5,6 +5,8 @@ import { ProviderRegistry } from "./providers/ProviderRegistry.js";
 import { AIProviderType, IProvider } from "./types/IProvider.js";
 import { ProviderManager } from "./providers/ProviderManager.js";
 
+import fs from 'fs';
+
 function registerProviders() {
     // Lazy load OpenAI
     ProviderRegistry.registerProvider(AIProviderType.OpenAI, async (config:IProviderConfig) => {
@@ -52,11 +54,36 @@ async function main() {
         appConfig.providers.openai.connection1
     );
 
+    const result = await openai1.generateSpeech!("Hello world from Chatgpt");
+
+   console.log(JSON.stringify(result, null, 2))
+/*
     //console.log("openai1", JSON.stringify(openai1, null, 2));
+//const fs = await import ('fs');
+const path = await import ('path');
 
-    const result = await openai1.generateText!("hello from connection1");
+// Path to your PNG file
+const filePath = path.join('test_data/test.jpeg');
 
+// Read the file
+  // Read the file into a Buffer
+  const fileBuffer = fs.readFileSync(filePath);
+
+  // Wrap in a File object and set type explicitly
+  //const file = new File([fileBuffer], "test_data/test.jpeg", { type: "image/jpeg" });
+
+
+    //const result = await openai1.translateAudio!(file);
+
+const result = await openai1.editVideo!("She turns around and smiles, then falls down comedically.");
     console.log(result);
+
+fs.writeFileSync('test_data/video_remix.mp4', result.output.buffer);
+
+console.log('Wrote video.mp4');    
+*/
+
+
 
     /*const openai1 = await ProviderManager.getProvider(AIProviderType.OpenAI, {
         name: AIProviderType.OpenAI,

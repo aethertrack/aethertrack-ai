@@ -34,6 +34,30 @@
                             "size": "1024x1024",
                             "n": 1
                         }
+                    },
+                    "gpt-4o-transcribe": {
+                        "roles": ["audio"],
+                        "audioOptions": {
+                            "language": "en"
+                        }
+                    },
+                    "gpt-4o-mini-tts": {
+                        "roles": ["audio"],
+                        "audioOptions": {
+                            "language": "en",
+                            "voice": "alloy"
+                        }                        
+                    },
+                    "sora-2": {
+                        "roles": ["video"],
+                        "videoOptions": {
+                            "seconds": "8",
+                            "size": "1280x720"
+                        }                          
+                    },
+                    "omni-moderation-latest": {
+                        "roles": ["moderation"],
+                        "moderationOptions": {}
                     }
                 }
             },

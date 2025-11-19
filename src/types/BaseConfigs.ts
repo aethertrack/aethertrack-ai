@@ -9,7 +9,9 @@ export interface IModelConfig<
     TStreamOptions extends Record<string, any> = Record<string, any>,
     TEmbedOptions extends Record<string, any> = Record<string, any>,        
     TImageOptions extends Record<string, any> = Record<string, any>,
-    TAudioOptions extends Record<string, any> = Record<string, any>    
+    TAudioOptions extends Record<string, any> = Record<string, any>,    
+    TVideoOptions extends Record<string, any> = Record<string, any>,
+    TModerationOptions extends Record<string, any> = Record<string, any>  
 > {
     roles: ModelRole[];
     chatOptions?: TChatOptions;
@@ -18,6 +20,8 @@ export interface IModelConfig<
     embedOptions?: TEmbedOptions;
     imageOptions?: TImageOptions;
     audioOptions?: TAudioOptions;
+    videoOptions?: TVideoOptions;
+    moderationOptions?: TModerationOptions;
 }
 
 /**
@@ -50,7 +54,9 @@ export enum ModelRole {
     Embed = "embed",
     Image = "image",
     Audio = "audio",
-    Stream = "stream"
+    Stream = "stream",
+    Video = "video",
+    Moderation = "moderation"
 }
 
 /**
@@ -63,4 +69,6 @@ export enum ModelOptionKey {
     Embed = "embedOptions",
     Image = "imageOptions",
     Audio = "audioOptions",
+    Video = "videoOptions",
+    Moderation = "moderationOptions",
 }
